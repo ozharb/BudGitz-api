@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS budgitz_itemz;
+DROP TABLE IF EXISTS budgitz_items;

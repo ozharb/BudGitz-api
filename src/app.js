@@ -6,17 +6,24 @@ const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
+const listsRouter = require('./lists/lists-router');
+// const itemsRouter = require('./items/items-router');
 
 const app = express();
+app.use(cors());
+app.use(helmet());
 
 const morganOption = (NODE_ENV === 'production')
   ? 'tiny'
   : 'common';
 
 app.use(morgan(morganOption));
-app.use(helmet());
+app.use('/api/lists', listsRouter);
+// app.use('/api/items', itemsRouter);
+
+
 app.get('/', (req, res) => {
-  res.send('Hello, boilerplate!');
+  res.send('Running Budgitz-Api!');
 });
 app.use(function errorHandler(error, req, res, next) {
   let response;
@@ -29,6 +36,6 @@ app.use(function errorHandler(error, req, res, next) {
   res.status(500).json(response);
 });
 
-app.use(cors());
+
 
 module.exports = app;
