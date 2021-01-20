@@ -2,7 +2,7 @@
 const path = require('path')
 const express = require('express');
 const xss = require('xss');
-const ListsService = require('./Lists-service');
+const ListsService = require('./lists-service');
 
 const listsRouter = express.Router();
 const jsonParser = express.json();
