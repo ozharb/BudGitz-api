@@ -47,9 +47,9 @@ describe('Lists Endpoints', function() {
           expect(res.body.list_name).to.eql(newList.list_name);
           expect(res.body).to.have.property('id');
           expect(res.headers.location).to.eql(`/api/lists/${res.body.id}`);
-        //   const expected = new Intl.DateTimeFormat('en-US').format(new Date())
-        //   const actual = new Intl.DateTimeFormat('en-US').format(new Date(res.body.date_created))
-        //   expect(actual).to.eql(expected)
+          const expected = new Intl.DateTimeFormat('en-US').format(new Date())
+          const actual = new Intl.DateTimeFormat('en-US').format(new Date(res.body.date_published))
+          expect(actual).to.eql(expected)
         });
     });
   });
