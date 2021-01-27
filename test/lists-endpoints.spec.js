@@ -92,10 +92,13 @@ describe('Lists Endpoints', function() {
 
       it('responds with 200 and all of the Lists', () => {
         // eslint-disable-next-line no-undef
-        return supertest(app)
+          const testUser = testUsers[0]
+          const expectedLists = testLists.filter(list=>
+            list.user_id === testUser.id)
+          return supertest(app, testUser.id)
           .get('/api/lists')
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
-          .expect(200, testLists);
+          .expect(200, expectedLists);
       });
     });
   });
@@ -167,14 +170,16 @@ describe('Lists Endpoints', function() {
     })
     
       it('responds with 204 and removes the List', () => {
+        const testUser = testUsers[0]
         const idToRemove = 2;
-        const expectedLists = testLists.filter(list => list.id !== idToRemove);
+        
+        const expectedLists = testLists.filter(list => list.id !== idToRemove && list.user_id === testUser.id);
         return supertest(app)
           .delete(`/api/lists/${idToRemove}`)
-          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(204)
           .then(res =>
-            supertest(app)
+            supertest(app, testUser.id)
               .get('/api/lists')
               .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
               .expect(expectedLists)

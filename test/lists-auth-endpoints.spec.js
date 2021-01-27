@@ -101,14 +101,11 @@ describe('Lists Endpoints', function() {
       )
 
       it('responds with 200 and all of the lists', () => {
-        const expectedLists = testLists.map(lists =>
-          helpers.makeExpectedList(
-            testUsers,
-            lists,
-            testItems,
-          )
-        )
-        return supertest(app)
+
+        const testUser = testUsers[0]
+        const expectedLists = testLists.filter(list=>
+          list.user_id === testUser.id)
+        return supertest(app, testUser.id)
           .get('/api/lists')
           .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
           .expect(200, expectedLists)
