@@ -5,7 +5,7 @@ const path = require('path');
 const express = require('express');
 const xss = require('xss');
 const ItemsService = require('./items-service');
-
+const { requireAuth } = require('../middleware/jwt-auth')
 const itemsRouter = express.Router();
 const jsonParser = express.json();
 
@@ -22,6 +22,7 @@ const serializeItem = item => ({
 
 itemsRouter
   .route('/')
+  .all(requireAuth)
   .get((req, res, next) => {
     const knexInstance = req.app.get('db');
     ItemsService.getAllItems(knexInstance)
@@ -30,7 +31,7 @@ itemsRouter
       })
       .catch(next);
   })
-  .post(jsonParser, (req, res, next) => {
+  .post(requireAuth, jsonParser, (req, res, next) => {
     const { item_name, price, quantity, calc, content, list_id } = req.body;
     const newItem = { item_name, price, list_id };
 
@@ -63,6 +64,7 @@ itemsRouter
 
 itemsRouter
   .route('/:item_id')
+  .all(requireAuth)
   .all((req, res, next) => {
     ItemsService.getById(
       req.app.get('db'),
@@ -92,7 +94,7 @@ itemsRouter
       })
       .catch(next);
   })
-  .patch(jsonParser, (req, res, next) => {
+  .patch(requireAuth, jsonParser, (req, res, next) => {
     const {  item_name, price, quantity, calc, content, list_id  } = req.body;
     const itemToUpdate = { item_name, price, content, list_id, quantity, calc};
 

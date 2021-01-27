@@ -1,135 +1,253 @@
-function makeExpectedThing(users, thing, reviews=[]) {
-    const user = users
-      .find(user => user.id === thing.user_id)
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+
+function makeUsersArray() {
+  return [
+    {
+      id: 1,
+      user_name: 'test-user-1',
+      full_name: 'Test user 1',
+      nickname: 'TU1',
+      password: 'password',
+      date_created: new Date('2029-01-22T16:28:32.615Z'),
+    },
+    {
+      id: 2,
+      user_name: 'test-user-2',
+      full_name: 'Test user 2',
+      nickname: 'TU2',
+      password: 'password',
+      date_created: new Date('2029-01-22T16:28:32.615Z'),
+    },
+    {
+      id: 3,
+      user_name: 'test-user-3',
+      full_name: 'Test user 3',
+      nickname: 'TU3',
+      password: 'password',
+      date_created: new Date('2029-01-22T16:28:32.615Z'),
+    },
+    {
+      id: 4,
+      user_name: 'test-user-4',
+      full_name: 'Test user 4',
+      nickname: 'TU4',
+      password: 'password',
+      date_created: new Date('2029-01-22T16:28:32.615Z'),
+    },
+  ]
+}
+
+function makeListsArray(users) {
+  return [
+    {
+      id: 1,
+      date_published: '2029-01-22T16:28:32.615Z',
+      list_name: 'Road Trip',
+      user_id: users[0].id
+    },
+    {
+      id: 2,
+      date_published: '2010-01-22T16:28:32.615Z',
+      list_name: 'Clothes',
+      user_id: users[1].id
+    },
+    {
+      id: 3,
+      date_published: '2017-01-22T16:28:32.615Z',
+      list_name: 'Car',
+      user_id: users[2].id
+    },
+    {
+      id: 4,
+      date_published: '1999-03-24T16:28:32.615Z',
+      list_name: 'Tools',
+      user_id: users[3].id
+    },
+  ];
+}
+
+function makeItemsArray() {
+  return [
+    {
+      id:1,
+      date_made: '2029-01-22T16:28:32.615Z',
+      item_name: 'paint',
+      price: 20,
+      calc: false,
+      list_id: 1,
+    },
+    {
+        id: 2,
+        date_made: '2019-01-12T16:28:32.615Z',
+        item_name: 'thingy',
+        price: 20,
+        calc: true,
+        list_id: 1,
+    },
+    {
+        id: 3,
+        date_made: '2029-01-23T16:28:30.615Z',
+        item_name: 'wrench',
+        price: 77,
+        calc: false,
+        list_id: 2,
+    },
+    {
+        id: 4,
+        date_made: '2029-01-22T16:28:32.615Z',
+        item_name: 'watch',
+        price: 557,
+        calc: true,
+        list_id: 3,
+    },
+  ];
+}
+
+function makeExpectedList(users, list, items=[]) {
+  const listUser = users
+    .find(user => user.id === list.user_id)
+
+  const number_of_items = items
+    .filter(item => item.list_id === list.id)
+    .length
+
+  return {
+    id: list.id,
+    list_name: list.list_name,
+    date_published: list.date_published,
+    user_id:list.user_id,
   
-    const thingReviews = reviews
-      .filter(review => review.thing_id === thing.id)
-  
-    const number_of_reviews = thingReviews.length
-    const average_review_rating = calculateAverageReviewRating(thingReviews)
-  
+  }
+}
+
+function makeExpectedListItems(lists, listId, items) {
+  const expectedItems = items
+    .filter(item => item.list_id === listId)
+
+  return expectedItems.map(item => {
+    const itemsList = lists.find(list => list.id === item.list_id)
     return {
-      id: thing.id,
-      image: thing.image,
-      title: thing.title,
-      content: thing.content,
-      date_created: thing.date_created,
-      number_of_reviews,
-      average_review_rating,
-      user: {
-        id: user.id,
-        user_name: user.user_name,
-        full_name: user.full_name,
-        nickname: user.nickname,
-        date_created: user.date_created,
-      },
+      id: item.id,
+      item_name: item.item_name,
+      price:item.price,
+      quantity: item.quantity,
+      calc:item.calc,
+      date_made: item.date_made,
+      list_id: itemsList.id
     }
+  })
+}
+function makeMaliciousList(user) {
+  const maliciousList = {
+    id: 911,
+    date_published: new Date(),
+    list_name: 'Naughty naughty very naughty <script>alert("xss");</script>',
+    user_id: user.id,
   }
-  
-  function calculateAverageReviewRating(reviews) {
-    if(!reviews.length) return 0
-  
-    const sum = reviews
-      .map(review => review.rating)
-      .reduce((a, b) => a + b)
-  
-    return Math.round(sum / reviews.length)
+  const expectedList = {
+    ...makeExpectedList([user], maliciousList),
+    list_name: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
   }
-  
-  function makeExpectedThingReviews(users, thingId, reviews) {
-    const expectedReviews = reviews
-      .filter(review => review.thing_id === thingId)
-  
-    return expectedReviews.map(review => {
-      const reviewUser = users.find(user => user.id === review.user_id)
-      return {
-        id: review.id,
-        text: review.text,
-        rating: review.rating,
-        date_created: review.date_created,
-        user: {
-          id: reviewUser.id,
-          user_name: reviewUser.user_name,
-          full_name: reviewUser.full_name,
-          nickname: reviewUser.nickname,
-          date_created: reviewUser.date_created,
-        }
-      }
-    })
+  return {
+    maliciousList,
+    expectedList,
   }
-  
-  function makeMaliciousThing(user) {
-    const maliciousThing = {
-      id: 911,
-      image: 'http://placehold.it/500x500',
-      date_created: new Date().toISOString(),
-      title: 'Naughty naughty very naughty <script>alert("xss");</script>',
-      user_id: user.id,
-      content: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
-    }
-    const expectedThing = {
-      ...makeExpectedThing([user], maliciousThing),
-      title: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
-      content: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`,
-    }
-    return {
-      maliciousThing,
-      expectedThing,
-    }
-  }
-  
-  function makeThingsFixtures() {
-    const testUsers = makeUsersArray()
-    const testThings = makeThingsArray(testUsers)
-    const testReviews = makeReviewsArray(testUsers, testThings)
-    return { testUsers, testThings, testReviews }
-  }
-  
-  function cleanTables(db) {
-    return db.raw(
+}
+
+function makeListsFixtures() {
+  const testUsers = makeUsersArray()
+  const testLists = makeListsArray(testUsers)
+  const testItems = makeItemsArray(testUsers, testLists)
+  return { testUsers, testLists, testItems }
+}
+
+function cleanTables(db) {
+  return db.transaction(trx =>
+    trx.raw(
       `TRUNCATE
-        thingful_things,
-        thingful_users,
-        thingful_reviews
-        RESTART IDENTITY CASCADE`
+        budgitz_lists,
+        budgitz_users,
+        budgitz_items
+      `
     )
-  }
-  
-  function seedThingsTables(db, users, things, reviews=[]) {
-    return db
-      .into('thingful_users')
-      .insert(users)
-      .then(() =>
-        db
-          .into('thingful_things')
-          .insert(things)
+    .then(() =>
+      Promise.all([
+        trx.raw(`ALTER SEQUENCE budgitz_lists_id_seq minvalue 0 START WITH 1`),
+        trx.raw(`ALTER SEQUENCE budgitz_users_id_seq minvalue 0 START WITH 1`),
+        trx.raw(`ALTER SEQUENCE budgitz_items_id_seq minvalue 0 START WITH 1`),
+        trx.raw(`SELECT setval('budgitz_lists_id_seq', 0)`),
+        trx.raw(`SELECT setval('budgitz_users_id_seq', 0)`),
+        trx.raw(`SELECT setval('budgitz_items_id_seq', 0)`),
+      ])
+    )
+  )
+}
+function seedUsers(db, users) {
+     const preppedUsers = users.map(user => ({
+       ...user,
+       password: bcrypt.hashSync(user.password, 1)
+     }))
+     return db.into('budgitz_users').insert(preppedUsers)
+       .then(() =>
+         // update the auto sequence to stay in sync
+         db.raw(
+           `SELECT setval('budgitz_users_id_seq', ?)`,
+           [users[users.length - 1].id],
+         )
+       )
+   }
+
+function seedListsTables(db, users, lists, items=[]) {
+  // use a transaction to group the queries and auto rollback on any failure
+  return db.transaction(async trx => {
+    await seedUsers(trx, users)
+    await trx.into('budgitz_lists').insert(lists)
+    // update the auto sequence to match the forced id values
+    await trx.raw(
+             `SELECT setval('budgitz_lists_id_seq', ?)`,
+             [lists[lists.length - 1].id],
+           )
+    // only insert items if there are some, also update the sequence counter
+    if (items.length) {
+      await trx.into('budgitz_items').insert(items)
+      await trx.raw(
+        `SELECT setval('budgitz_items_id_seq', ?)`,
+        [items[items.length - 1].id],
       )
-      .then(() =>
-        reviews.length && db.into('thingful_reviews').insert(reviews)
-      )
-  }
+    }
+  })
+}
+
+function seedMaliciousList(db, user, article) {
+  return seedUsers(db, [user])
+    .then(() =>
+      db
+        .into('budgitz_lists')
+        .insert([article])
+    )
+}
+
+function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+  const token = jwt.sign({ user_id: user.id }, secret, {
+         subject: user.user_name,
+         algorithm: 'HS256',
+       })
+     return `Bearer ${token}`
+   }
   
-  function seedMaliciousThing(db, user, thing) {
-    return db
-      .into('thingful_users')
-      .insert([user])
-      .then(() =>
-        db
-          .into('thingful_things')
-          .insert([thing])
-      )
-  }
-  
-//   module.exports = {
-//     makeUsersArray,
-//     makeThingsArray,
-//     makeExpectedThing,
-//     makeExpectedThingReviews,
-//     makeMaliciousThing,
-//     makeReviewsArray,
-  
-//     makeThingsFixtures,
-//     cleanTables,
-//     seedThingsTables,
-//     seedMaliciousThing,
-//   }
+
+module.exports = {
+  makeUsersArray,
+  makeListsArray,
+  makeExpectedList,
+  makeExpectedListItems,
+  makeMaliciousList,
+  makeItemsArray,
+  seedUsers,
+  makeListsFixtures,
+  cleanTables,
+  seedListsTables,
+  seedMaliciousList,
+  makeAuthHeader,
+}

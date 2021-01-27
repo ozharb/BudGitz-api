@@ -8,6 +8,8 @@ const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
 const listsRouter = require('./lists/lists-router');
 const itemsRouter = require('./items/items-router');
+const usersRouter = require('./users/users-router');
+const authRouter = require('./auth/auth-router')
 
 const app = express();
 app.use(cors());
@@ -20,7 +22,8 @@ const morganOption = (NODE_ENV === 'production')
 app.use(morgan(morganOption));
 app.use('/api/lists', listsRouter);
 app.use('/api/items', itemsRouter);
-
+app.use('/api/users', usersRouter);
+app.use('/api/auth', authRouter);
 
 app.get('/', (req, res) => {
   res.send('Running Budgitz-Api!');

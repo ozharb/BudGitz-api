@@ -3,10 +3,12 @@ const app = require('../src/app')
 // const helpers = require('./test-helpers')
 const { makeItemsArray } = require('./items.fixtures');
 const { makeListsArray } = require('./lists.fixtures');
+const { makeUsersArray } = require('./users.fixtures');
+const helpers = require('./test-helpers')
 
 describe('Items Endpoints', function() {
   let db
-
+  const testUsers = makeUsersArray();
   const testLists = makeListsArray();
   const testItems = makeItemsArray();
 
@@ -20,12 +22,14 @@ describe('Items Endpoints', function() {
 
   after('disconnect from db', () => db.destroy());
   
-  before('clean the table', () => db.raw('TRUNCATE budgitz_lists, budgitz_items RESTART IDENTITY CASCADE'));
+  before('clean the table', () => db.raw('TRUNCATE budgitz_users, budgitz_lists, budgitz_items RESTART IDENTITY CASCADE'));
 
-  afterEach('cleanup',() => db.raw('TRUNCATE budgitz_lists, budgitz_items RESTART IDENTITY CASCADE'));
+  afterEach('cleanup',() => db.raw('TRUNCATE budgitz_users, budgitz_lists, budgitz_items RESTART IDENTITY CASCADE'));
 
   describe(`POST /api/items`, () => {
     beforeEach('insert lists', () =>{
+      return  helpers.seedUsers(db, testUsers)
+          .then(() => {
         return db
         .into('budgitz_lists')
         .insert(testLists)
@@ -36,6 +40,7 @@ describe('Items Endpoints', function() {
         )
       
       })
+    })
 
     it(`creates an item, responding with 201 and the new item`, function() {
       this.retries(3)
@@ -50,6 +55,7 @@ describe('Items Endpoints', function() {
       }
       return supertest(app)
         .post('/api/items')
+        .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
         .send(newItem)
         .expect(201)
         .expect(res => {
@@ -97,6 +103,7 @@ describe('Items Endpoints', function() {
 
         return supertest(app)
           .post('/api/items')
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
           .send(newItem)
           .expect(400, {
             error: { message: `Missing '${field}' in request body`},
