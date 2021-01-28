@@ -36,7 +36,8 @@ authRouter
                 
                 res.send({
                   authToken: AuthService.createJwt(sub, payload),
-                  user_name: dbUser.user_name
+                  user_name: dbUser.user_name,
+                  date: dbUser.date_created
                 })
             })
     })
