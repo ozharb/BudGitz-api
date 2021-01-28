@@ -22,7 +22,6 @@ const UsersService = {
         .where('id', id)
         .first()
     },
-  
     deleteUser(knex, id) {
       return knex('budgitz_users')
         .where({ id })

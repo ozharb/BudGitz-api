@@ -17,6 +17,7 @@ listsRouter
   .route('/')
   .all(requireAuth)
   .get((req, res, next) => {
+    
     ListsService.getAllLists(
       req.app.get('db'),req.user.id)
   

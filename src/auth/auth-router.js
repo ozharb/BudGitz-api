@@ -1,6 +1,5 @@
 const express = require('express')
 const AuthService = require('./auth-service')
-
 const authRouter = express.Router()
 const jsonBodyParser = express.json()
 
@@ -36,8 +35,7 @@ authRouter
                 
                 res.send({
                   authToken: AuthService.createJwt(sub, payload),
-                  user_name: dbUser.user_name,
-                  date: dbUser.date_created
+                  user_name: dbUser.user_name
                 })
             })
     })
