@@ -25,8 +25,7 @@ itemsRouter
   .all(requireAuth)
   .get((req, res, next) => {
     const knexInstance = req.app.get('db');
-    ItemsService.getByIdUser(knexInstance,
-      req.user.id)
+    ItemsService.getAllItems(knexInstance)
       .then(items => {
         res.json(items.map(serializeItem));
       })
