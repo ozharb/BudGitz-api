@@ -16,9 +16,9 @@ Watch your total costs update in real-time as you add, remove, and edit items in
 
 ## How to use Api
 
- * API_ENDPOINT: https://peaceful-shelf-32168.herokuapp.com/api,
+ * API_ENDPOINT: `https://peaceful-shelf-32168.herokuapp.com/api`,
  
- * For testing use: 'http://localhost:8000/api',
+ * For testing use: `http://localhost:8000/api`,
    
  * Bearer token required: TOKEN_KEY: 'budgitz-client-auth-token',
 
@@ -28,8 +28,12 @@ The Base URL is the root URL for all of the API, if you ever make a request get 
 The Base URL is https://peaceful-shelf-32168.herokuapp.com/api
 
 #### Authentication
-Requires bearer token. You may use the front end client to register an account and create a token.
+Requires bearer token. You may use the front end client to login and create a token using demo account.
 
+https://budgitz-client.ozharb.vercel.app/login
+
+* user name: Demo
+* password: Demo@2021
 
 #### CRUD requests
 API supports Get, Post, Delete, and Patch requests.
