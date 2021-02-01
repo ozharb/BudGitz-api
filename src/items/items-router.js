@@ -18,6 +18,7 @@ const serializeItem = item => ({
   content: xss(item.content),
   list_id: item.list_id,
   date_made: item.date_made,
+  user: item.user,
 });
 
 itemsRouter
@@ -25,7 +26,8 @@ itemsRouter
   .all(requireAuth)
   .get((req, res, next) => {
     const knexInstance = req.app.get('db');
-    ItemsService.getAllItems(knexInstance)
+    ItemsService.getByIdUser(knexInstance,
+      req.user.id)
       .then(items => {
         res.json(items.map(serializeItem));
       })

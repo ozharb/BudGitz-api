@@ -10,21 +10,28 @@ const ItemsService = {
         'budgitz_items'
       )
       
-      .select(`*`,
-      `budgitz_users.id AS "user"`
+      .select(`budgitz_items.id`,
+     `budgitz_items.item_name`,
+    `budgitz_items.price`,
+    `budgitz_items.quantity`,
+    `budgitz_items.calc`,
+    `budgitz_items.content`,
+    `budgitz_items.list_id`,
+    `budgitz_items.date_made`,
+    `budgitz_users.id as user`,
       )
       .join(
         `budgitz_lists`,
         `budgitz_lists.id`,
         `budgitz_items.list_id`
       )
-      .join(
+      .leftJoin(
         `budgitz_users`,
         `budgitz_users.id`,
         `budgitz_lists.user_id`
       )
       .where(
-        `budgitz_users.id`, '=', id
+        `budgitz_users.id`, id
       )
 
       
